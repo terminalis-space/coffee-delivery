@@ -20,7 +20,7 @@ The agent runs in the private backend through Amazon Bedrock. The browser is its
 | `set_assistance(enabled)` | Enable or disable target assistance |
 | `cancel_copilot_action()` | Cancel the landing action and yield to the player |
 
-Model inference runs separately from the physics loop. Human steering invalidates pending model actions so a late response cannot take control back. The human round allows coaching but rejects agent control actions.
+Model inference runs separately from the physics loop. Human steering invalidates pending model actions so a late response cannot take control back. The current page centers the conversation; keyboard steering remains available for takeover.
 
 **The language model chooses a supported policy; the FPGA computes the low-level control commands.** This is one language-model agent working with a deterministic controller. It does not generate motor commands, train online, or discover a new landing controller. The public files document this integration but do not contain or independently reproduce the runtime agent.
 
@@ -45,11 +45,13 @@ Browser → private local bridge → Arty FPGA → simulated flight → browser
                 bounded policy requests
 ```
 
-A person steers the flight target in the human round. In the copilot round, a real Amazon Bedrock response requests a bounded landing policy. Both rounds use the same board-assisted control loop, and the player can take over at any time. Physical buttons on the Arty produce gust events; the aircraft and wind effects are simulated.
+Start a delivery, then ask the copilot to land through the prominent chat. A real Amazon Bedrock response requests a bounded landing policy, and the player can take over at any time. Physical buttons on the Arty produce gust events; the aircraft and wind effects are simulated.
+
+The initial delivery holds its current target. A gust displaces the drone and the position controller corrects toward that target. Asking to hold captures the current position and cancels a landing; no free-drift mode is implemented.
 
 ## What was built for the hackathon
 
-The project reuses a pre-existing board controller. The new hackathon work is the agent's telemetry and tool interface, application/rejection feedback, human takeover handling, and their integration into the coffee-delivery game with physical directional gusts and human/copilot rounds.
+The project reuses a pre-existing board controller. The new hackathon work is the agent's telemetry and tool interface, application/rejection feedback, human takeover handling, and their integration into the coffee-delivery game with physical directional gusts and conversational control.
 
 The controller implementation, numerical model, hardware build artifacts, backend configuration, and detailed runtime evidence remain private. This repository does not reproduce those components or make a standalone hardware-performance claim.
 

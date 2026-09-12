@@ -11,7 +11,7 @@ let feedOnline = false, lastSnapshotAt = 0, attemptNumber = 0, oldSession = "", 
 let visiblePose = null, previousPose = null, poseUpdatedAt = 0, toastUntil = 0;
 let requestPending = false, chatPending = false, lastDiagnosticRender = 0, snapshotRequestBusy = false, lastPadGeometry = "", feedError = false;
 let pendingStart = null;
-let lastRoundResults = "";
+let sentMessages = [], sentMessageId = 0, lastConversation = "";
 const finite = (value) => typeof value === "number" && Number.isFinite(value);
 const vector = (value) => Array.isArray(value) && value.length === 3 && value.every(finite);
 const number = (value, digits = 1) => finite(value) ? value.toFixed(digits) : "—";
@@ -125,24 +125,12 @@ function waitForNewSession() {
 async function runCommand(path,body = {}) {
   if (requestPending || pendingStart) return;
   requestPending = true; releaseInputs(); showError("");
-  const startsSession = path === "/api/start" || path === "/api/round";
+  const startsSession = path === "/api/start";
   if (startsSession) waitForNewSession();
   renderStatus();
   try { await post(path,body); await getSnapshot(); }
   catch(error) {if (startsSession) clearPendingStart(); showError(error.message);}
   finally {requestPending = false; renderStatus();}
-}
-function canStartRound(role) {
-  return ["human","copilot"].includes(role) && feedOnline && !!state?.session && state.hardware?.connected && !state.hardware.fault &&
-    !requestPending && !pendingStart && !fixtureMode && (role === "human" || state.copilot?.available === true || state.copilot?.configured === true);
-}
-function startRound(role) {
-  if (!canStartRound(role)) return;
-  return runCommand("/api/round",{session:state.session,role});
-}
-function endRound() {
-  if (!isPlayable() || state.challenge?.role === "practice" || !["human","copilot"].includes(state.challenge?.role)) return;
-  return runCommand("/api/end-round",{session:state.session});
 }
 async function cancel() {
   releaseInputs(); if(pendingStart || !state?.session || !feedOnline || fixtureMode) return;
@@ -152,16 +140,20 @@ async function cancel() {
 async function chat(text) {
   text = text.trim();
   if (!text || !canRequestCopilot()) return;
+  const session = state.session, tick = state.tick;
   chatPending = true; showError(""); renderStatus();
-  try {await post("/api/chat",{session:state.session,text}); $("chat-input").value = "";}
+  try {
+    await post("/api/chat",{session,text});
+    if (state?.session === session) {
+      sentMessages.push({id:++sentMessageId,session,tick,text,role:"user"});
+      sentMessages = sentMessages.slice(-8); $("chat-input").value = "";
+    }
+  }
   catch(error) {showError(`Copilot: ${error.message}`);}
   finally {chatPending = false; renderStatus();}
 }
 $("connect-button").addEventListener("click", () => runCommand("/api/connect"));
 $("start-button").addEventListener("click", () => runCommand("/api/start"));
-$("human-round-button").addEventListener("click", () => startRound("human"));
-$("copilot-round-button").addEventListener("click", () => startRound("copilot"));
-$("end-round-button").addEventListener("click", endRound);
 $("cancel-button").addEventListener("click", cancel);
 $("chat-form").addEventListener("submit", event => {event.preventDefault(); void chat($("chat-input").value);});
 document.querySelectorAll("[data-message]").forEach(button => button.addEventListener("click", () => chat(button.dataset.message)));
@@ -182,7 +174,7 @@ function acceptSnapshot(next) {
   if (next.session !== oldSession) {
     clearHeldInputs(); releasePending = false; releaseSequence = 0; sequence = 0; lastEventIdentity = ""; toastUntil = 0; visiblePose = null; previousPose = null;
     if (next.mode === "running") attemptNumber += 1;
-    oldSession = next.session;
+    oldSession = next.session; sentMessages = []; lastConversation = "";
   }
   if (Number.isSafeInteger(next.next_input_sequence) && next.next_input_sequence >= 0) {
     // Another tab has already superseded this tab's last active input.
@@ -214,11 +206,14 @@ function message(kicker,title,detail,kind="") {
   el.children[0].textContent = kicker; el.children[1].textContent = title; el.children[2].textContent = detail;
 }
 function renderStatus() {
+  // Measure before changing either history or the live status text.
+  const chatScroll = $("chat-scroll"), previousScrollTop = chatScroll.scrollTop;
+  const followLatest = chatScroll.scrollHeight - previousScrollTop - chatScroll.clientHeight <= 24;
   const hardware = state?.hardware || {}, timing = state?.timing || {}, copilot = state?.copilot || {};
   const connected = feedOnline && hardware.connected;
   const fault = hardware.fault || (!feedOnline && state ? "The local bridge is not sending fresh snapshots." : null);
   const running = state?.mode === "running";
-  const roundRole = state?.challenge?.role || "practice";
+  const coachingOnly = state?.challenge?.role === "human";
   const statusLabel = fixtureMode ? "Development fixture" : fault ? "Flight paused · fault" : connected ? "Arty connected" : feedOnline ? "Arty disconnected" : "Bridge offline";
   $("connection-status").className = `hardware-status ${fault ? "fault" : connected ? "connected" : ""}`;
   $("connection-status").lastElementChild.textContent = statusLabel;
@@ -229,8 +224,8 @@ function renderStatus() {
   $("cancel-button").disabled = !!pendingStart || !connected || !state?.session || fixtureMode;
   const canChat = canRequestCopilot();
   $("chat-input").disabled = !canChat; $("send-button").disabled = !canChat;
-  $("chat-input").placeholder = copilot.configured && !copilot.available ? "Model unavailable — type a message to retry" : roundRole === "human" ? "Ask for coaching — you control this round" : "Try “Help me land gently”";
-  document.querySelectorAll("[data-message]").forEach(button => button.disabled = !canChat || !copilot.available || !running || roundRole === "human");
+  $("chat-input").placeholder = copilot.configured && !copilot.available ? "Model unavailable — type a message to retry" : coachingOnly ? "Start a new delivery to let the copilot fly" : "Ask me to hold position or land…";
+  document.querySelectorAll("[data-message]").forEach(button => button.disabled = !canChat || !copilot.available || !running || coachingOnly);
   document.querySelectorAll("[data-axis]").forEach(button => button.disabled = !isPlayable());
   setText("attempt-number",String(Math.max(1,attemptNumber)).padStart(3,"0"));
   setText("assistance-label",state?.assistance ? "Copilot assistance on" : "Manual targets");
@@ -238,6 +233,7 @@ function renderStatus() {
   setText("copilot-status",!feedOnline ? "Bridge offline" : pendingStart ? "Waiting for the new delivery" : !copilot.available ? (copilot.busy || chatPending ? "Model unavailable · retrying" : "Model unavailable") : copilot.busy || chatPending ? (running ? "Thinking · flight keeps running" : "Thinking") : "Model connected");
   if(copilot.text) setText("copilot-text",copilot.text);
   else if (feedOnline && !copilot.available) setText("copilot-text","The copilot is unavailable. Hardware flight can continue; check the provider setup in the runbook.");
+  else setText("copilot-text","The drone starts holding its target. Ask me to land it.");
   setText("source-label",fixtureMode ? "Development fixture" : connected ? "Arty → simulated flight" : "No live hardware data");
   setText("qualification",fixtureMode ? "Illustrative preview" : connected ? "Private bridge connected" : "Private bridge required");
   $("qualification").className = "qualification";
@@ -261,49 +257,40 @@ function renderStatus() {
   else if(state.mode === "ready") message("Hardware ready", "Your delivery is ready for takeoff.", "Start delivery, then use WASD to move the target. Q / E changes altitude.");
   else if(state.mode === "landed") message("Confirmed by the simulator", "Coffee. Delivered.", state.outcome || "A soft landing and a well-earned coffee.","is-outcome");
   else if(state.mode === "failed") message("Attempt complete", "That coffee had an adventure.",state.outcome || "Restart for a fresh delivery.","is-outcome");
-  else if(state.mode === "finished") message("Round ended by the host", "Coffee break. Round recorded.", "The recorded result is below. Choose the next round when you are ready.","is-outcome");
+  else if(state.mode === "finished") message("Delivery ended", "A quick coffee break.", state.outcome || "Start a fresh delivery when you are ready.","is-outcome");
   else if(state.mode === "paused") message("Physics paused", "A quick coffee break.",state.outcome || "Check the hardware status, then restart the delivery.","is-fault");
   else $("scene-message").hidden = true;
   if(state) setText("scene-description",`Authoritative simulated pose: x ${number(state.position[0],2)} metres, y ${number(state.position[1],2)} metres, altitude ${number(state.position[2],2)} metres. Flight ${state.mode}. ${state.outcome || ""}`);
-  renderRound(); renderMotors();
+  renderConversation(followLatest,previousScrollTop); renderMotors();
+  setText("gust-count",Number.isInteger(state?.metrics?.gusts) ? String(state.metrics.gusts) : "—");
+  setText("gust-directions",gustCounts(state?.metrics?.gusts_by_button));
   if ($("diagnostics").open && performance.now()-lastDiagnosticRender>500) renderDiagnostics();
 }
-function renderRound() {
-  const challenge = state?.challenge || {}, role = challenge.role || "practice", running = state?.mode === "running";
-  const results = challenge.results || {}, recorded = results[role]?.session === state?.session;
-  $("human-round-button").disabled = !canStartRound("human");
-  $("copilot-round-button").disabled = !canStartRound("copilot");
-  $("end-round-button").disabled = !isPlayable() || requestPending || !["human","copilot"].includes(role);
-  for (const name of ["human","copilot"]) {
-    const active = role === name && running;
-    $(`${name}-round-button`).setAttribute("aria-pressed",String(active));
-    $(`${name}-round-button`).className = `button round-button${active ? " is-active" : ""}`;
+function renderConversation(followLatest = false, previousScrollTop = 0) {
+  const history = Array.isArray(state?.copilot?.history) ? state.copilot.history.filter(item =>
+    item && item.session === state.session && typeof item.text === "string" && item.text.trim() &&
+    Number.isInteger(item.observed_tick) && item.observed_tick >= 0) : [];
+  // Backend requests also include automatic telemetry prompts. Show actual reply
+  // text only; user messages come from this browser's acknowledged submissions.
+  const messages = [...sentMessages.filter(item => item.session === state?.session),
+    ...history.map((item,index) => ({id:item.action_id || `reply-${index}`,tick:item.observed_tick,role:"assistant",text:item.text}))]
+    .sort((a,b) => a.tick-b.tick || (a.role === "user" ? 0 : 1)-(b.role === "user" ? 0 : 1)).slice(-6);
+  const log = $("conversation"), signature = JSON.stringify(messages);
+  log.hidden = !messages.length;
+  $("copilot-text").hidden = !!history.length && history.at(-1).text === state?.copilot?.text;
+  if (signature !== lastConversation) {
+    lastConversation = signature;
+    const fragment = document.createDocumentFragment();
+    for (const item of messages) {
+      const row = document.createElement("div"), label = document.createElement("span"), text = document.createElement("p");
+      row.className = `chat-message ${item.role}`; label.className = "chat-speaker";
+      label.textContent = item.role === "user" ? "You" : "Copilot"; text.textContent = item.text;
+      row.append(label,text); fragment.append(row);
+    }
+    log.replaceChildren(fragment);
   }
-  setText("round-role",role === "human" ? "Human round" : role === "copilot" ? (challenge.manual_takeover ? (challenge.model_policy_applied ? "Copilot round · mixed" : "Copilot round · player takeover") : "Copilot round") : "Practice");
-  setText("round-elapsed",finite(challenge.elapsed_wall_s) ? `${number(challenge.elapsed_wall_s,1)} s` : "—");
-  setText("round-gusts",Number.isInteger(state?.metrics?.gusts) ? String(state.metrics.gusts) : "—");
-  setText("round-gust-directions",gustCounts(state?.metrics?.gusts_by_button));
-  let hint = "Warm up with Start delivery, then hand the keys to the audience.";
-  if (pendingStart) hint = "Waiting for the new flight session. Controls resume when the bridge is ready.";
-  else if (!feedOnline || state?.hardware?.fault) hint = "Check the connection and flight status before continuing the rounds.";
-  else if (role === "human") hint = running ? "Audience: steer the green target onto the pad. The copilot can comment; you choose the targets." : recorded ? "Human round recorded. Start the copilot round when you are ready." : "The human round is stopped. Check flight status before continuing.";
-  else if (role === "copilot") hint = challenge.manual_takeover ? (challenge.model_policy_applied ? "Player steering took over. This round is marked mixed." : "Player steering took over before any model landing action was applied.") : !running ? (recorded ? "Copilot round recorded. The table shows the observed result." : "The copilot round is stopped. Check flight status before continuing.") : challenge.awaiting_model ? "Waiting for the real model to request a landing. FPGA flight continues." : challenge.model_policy_applied ? "The copilot chooses the landing target; the FPGA computes each control step." : "No model landing action has been applied. Request one in chat or end the round.";
-  setText("round-hint",hint);
-  const serialized = JSON.stringify(results);
-  $("round-results").hidden = !results.human && !results.copilot;
-  if (serialized === lastRoundResults) return;
-  lastRoundResults = serialized;
-  const statuses = {landed:"Landed",failed:"Failed",ended:"Ended by host",interrupted:"Interrupted"};
-  for (const name of ["human","copilot"]) {
-    const result = results[name];
-    setText(`${name}-result-status`,result ? statuses[result.status] || "Not recorded" : "Not run yet");
-    setText(`${name}-result-elapsed`,result ? `${number(result.elapsed_wall_s,1)} s` : "—");
-    setText(`${name}-result-simulation`,result ? `${number(result.simulation_time_s,1)} s` : "—");
-    setText(`${name}-result-gusts`,Number.isInteger(result?.gusts) ? String(result.gusts) : "—");
-    setText(`${name}-result-gust-directions`,gustCounts(result?.gusts_by_button));
-    setText(`${name}-result-touchdown`,finite(result?.touchdown_speed_m_s) ? `${number(result.touchdown_speed_m_s,3)} m/s` : "—");
-    setText(`${name}-result-policy`,!result ? "—" : name === "human" ? "Manual targets" : result.model_policy_applied !== true ? (result.manual_takeover ? "No model landing action applied · player takeover" : "No model landing action applied") : result.manual_takeover ? "Mixed · player takeover" : "Copilot landing policy");
-  }
+  const scroll = $("chat-scroll");
+  scroll.scrollTop = followLatest ? scroll.scrollHeight : previousScrollTop;
 }
 function renderMotors() {
   const controls = state?.hardware?.controls;

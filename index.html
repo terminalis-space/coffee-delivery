@@ -24,10 +24,19 @@
     </section>
 
     <div class="fixture-notice" id="fixture-notice" hidden>Development fixture · Static illustrative state · No hardware, physics or model acceptance</div>
-    <section class="rounds" aria-label="Human and copilot rounds">
-      <div class="round-controls"><div class="round-buttons"><button id="human-round-button" class="button round-button" disabled>1. Human round</button><button id="copilot-round-button" class="button round-button" disabled>2. Copilot round</button><button id="end-round-button" class="round-end" disabled>End round</button></div><div class="round-live"><strong id="round-role">Practice</strong><span><b id="round-elapsed">—</b> elapsed</span><span><b id="round-gusts">—</b> gusts</span></div></div>
-      <div class="round-instructions"><p id="round-hint">Warm up with Start delivery, then hand the keys to the audience.</p><div class="host-gust-guide"><span class="host-gust">Host gusts · Arty <strong>BTN0 −X</strong><strong>BTN1 +X</strong><strong>BTN2 −Y</strong><strong>BTN3 +Y</strong></span><span class="round-gust-directions">Applied this round: <b id="round-gust-directions">—</b></span><span class="board-reset">Reset: <strong>SW0 ON</strong>, then <strong>OFF before play</strong>.</span></div></div>
-      <p class="round-comparison-note">Both use the same FPGA-assisted control loop. Human target steering → copilot landing policy. Live gust timing may differ. Screen axes: +X ↘ · +Y ↙.</p>
+    <section class="copilot copilot-primary" aria-labelledby="copilot-title">
+      <div class="copilot-badge" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="M9 18 17 8h22l8 10v24H9Z"/><path d="M18 24v8m20-8v8M22 39h12M28 3v5"/><circle cx="28" cy="3" r="2"/></svg></div>
+      <div class="copilot-content">
+        <div class="copilot-heading"><h2 id="copilot-title">Your copilot</h2><span id="copilot-status">Checking availability</span></div>
+        <div id="chat-scroll" class="chat-scroll" tabindex="0" role="region" aria-label="Copilot conversation, scroll to read messages">
+          <div id="conversation" class="conversation" role="log" aria-label="Recent conversation" aria-live="polite" aria-relevant="additions" hidden></div>
+          <p id="copilot-text" class="copilot-live-status" aria-live="polite">The drone starts holding its target. Ask me to land it.</p>
+        </div>
+        <form id="chat-form"><label for="chat-input" class="visually-hidden">Message your copilot</label><input id="chat-input" name="message" maxlength="600" placeholder="Ask me to hold position or land…" autocomplete="off" disabled><button class="send-button" id="send-button" type="submit" aria-label="Send message to copilot" disabled>↗</button></form>
+        <div class="copilot-quick-actions"><button data-message="Please land gently on the coffee pad." disabled>Land on the pad</button><button data-message="Please hold this position." disabled>Hold position</button><button id="cancel-button" disabled>I'll take it from here <span aria-hidden="true">↩</span></button></div>
+        <div class="chat-gust-guide"><span class="host-gust">Physical gusts · Arty <strong>BTN0 −X</strong><strong>BTN1 +X</strong><strong>BTN2 −Y</strong><strong>BTN3 +Y</strong></span><span class="gust-counts"><b id="gust-count">—</b> applied · <span id="gust-directions">—</span></span></div>
+        <p class="chat-flight-note">Screen axes: +X ↘ · +Y ↙. Keep <strong>SW0 OFF</strong> to play; SW0 ON resets the board.</p>
+      </div>
     </section>
     <section id="flight" class="flight" aria-label="Coffee delivery flight" tabindex="-1">
       <div class="scene-topline">
@@ -102,25 +111,8 @@
       </div><span id="motor-sample-status" class="motor-sample-status">No hardware sample</span></div>
     </section>
 
-    <section class="round-results" id="round-results" aria-labelledby="round-results-title" hidden><div class="round-results-heading"><h2 id="round-results-title">The delivery record</h2><span>Observed rounds · no automatic score</span></div><table><thead><tr><th scope="col">Recorded measure</th><th scope="col">Human target steering</th><th scope="col">Copilot landing policy</th></tr></thead><tbody>
-      <tr><th scope="row">Outcome</th><td id="human-result-status">Not run yet</td><td id="copilot-result-status">Not run yet</td></tr>
-      <tr><th scope="row">Elapsed wall time</th><td id="human-result-elapsed">—</td><td id="copilot-result-elapsed">—</td></tr>
-      <tr><th scope="row">Simulation time</th><td id="human-result-simulation">—</td><td id="copilot-result-simulation">—</td></tr>
-      <tr><th scope="row">Physical gusts applied</th><td id="human-result-gusts">—</td><td id="copilot-result-gusts">—</td></tr>
-      <tr><th scope="row">Gusts by direction</th><td class="direction-counts" id="human-result-gust-directions">—</td><td class="direction-counts" id="copilot-result-gust-directions">—</td></tr>
-      <tr><th scope="row">Touchdown speed</th><td id="human-result-touchdown">—</td><td id="copilot-result-touchdown">—</td></tr>
-      <tr><th scope="row">Control policy</th><td id="human-result-policy">—</td><td id="copilot-result-policy">—</td></tr>
-    </tbody></table><p>Both use the same FPGA-assisted control loop. Live gust timing may differ.</p></section>
 
-    <section class="copilot" aria-labelledby="copilot-title">
-      <div class="copilot-badge" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="M9 18 17 8h22l8 10v24H9Z"/><path d="M18 24v8m20-8v8M22 39h12M28 3v5"/><circle cx="28" cy="3" r="2"/></svg></div>
-      <div class="copilot-content">
-        <div class="copilot-heading"><h2 id="copilot-title">Your copilot</h2><span id="copilot-status">Checking availability</span></div>
-        <p id="copilot-text" aria-live="polite">I bring the moral support. The FPGA brings the reflexes.</p>
-        <form id="chat-form"><label for="chat-input" class="visually-hidden">Message your copilot</label><input id="chat-input" name="message" maxlength="600" placeholder="Try “Help me land gently”" autocomplete="off" disabled><button class="send-button" id="send-button" type="submit" aria-label="Send message to copilot" disabled>↗</button></form>
-        <div class="copilot-quick-actions"><button data-message="Help me land gently." disabled>Help me land gently</button><button data-message="Your turn. Please land on the coffee pad." disabled>Your turn</button><button id="cancel-button" disabled>I'll take it from here <span aria-hidden="true">↩</span></button></div>
-      </div>
-    </section>
+
     <p class="request-error" id="request-error" role="alert" hidden></p>
     <footer class="status-strip" aria-label="Connection status"><span class="source-label" id="source-label">No hardware data</span><span class="qualification" id="qualification">Private bridge required</span></footer>
     <details class="diagnostics" id="diagnostics"><summary>Control notes</summary><div class="diagnostic-layout"><div><h3>Player controls</h3><p>A / D or ← / →: −X / +X. W / S or ↑ / ↓: +Y / −Y. Q / E lowers or raises the target. Escape takes over from the copilot.</p><p>Physical gusts: BTN0 −X, BTN1 +X, BTN2 −Y, BTN3 +Y. SW0 ON resets the board; return SW0 OFF before play.</p></div><div><h3>Public frontend</h3><p>Live board and AI interaction requires the private local backend. A static fixture is an illustrative preview with flight and model commands disabled.</p><p>Flight is simulated. The live demo uses real Arty hardware and Amazon Bedrock.</p></div></div></details>
