@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f0e6">
+  <title>You Fly. I Panic. — Coffee delivery, together.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23c35635'/%3E%3Cpath d='M13 16h23l-4 23H17z' fill='%23faf1dc'/%3E%3Cpath d='M10 13h28M17 8h15' stroke='%23faf1dc' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#flight">Skip to flight controls</a>
+  <main>
+    <header class="masthead">
+      <div class="wordmark"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M9 11h19l-3 19H12Z"/><path d="M7 8h23M13 3h11"/></svg><span>Special delivery</span></div>
+      <span class="edition">AI Tinkerers · Flight No. <span id="attempt-number">001</span></span>
+      <span class="hardware-status" id="connection-status"><i></i><span>Bridge offline</span></span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">A human, an AI, and a very important coffee.</p><h1 id="page-title">You fly. <em>I panic.</em></h1></div>
+      <p class="intro-copy">Get the coffee to the pad.<br> Share the controls. Expect a little turbulence.</p>
+    </section>
+
+    <div class="fixture-notice" id="fixture-notice" hidden>Development fixture · Static illustrative state · No hardware, physics or model acceptance</div>
+    <section class="rounds" aria-label="Human and copilot rounds">
+      <div class="round-controls"><div class="round-buttons"><button id="human-round-button" class="button round-button" disabled>1. Human round</button><button id="copilot-round-button" class="button round-button" disabled>2. Copilot round</button><button id="end-round-button" class="round-end" disabled>End round</button></div><div class="round-live"><strong id="round-role">Practice</strong><span><b id="round-elapsed">—</b> elapsed</span><span><b id="round-gusts">—</b> gusts</span></div></div>
+      <div class="round-instructions"><p id="round-hint">Warm up with Start delivery, then hand the keys to the audience.</p><div class="host-gust-guide"><span class="host-gust">Host gusts · Arty <strong>BTN0 −X</strong><strong>BTN1 +X</strong><strong>BTN2 −Y</strong><strong>BTN3 +Y</strong></span><span class="round-gust-directions">Applied this round: <b id="round-gust-directions">—</b></span><span class="board-reset">Reset: <strong>SW0 ON</strong>, then <strong>OFF before play</strong>.</span></div></div>
+      <p class="round-comparison-note">Both use the same FPGA-assisted control loop. Human target steering → copilot landing policy. Live gust timing may differ. Screen axes: +X ↘ · +Y ↙.</p>
+    </section>
+    <section id="flight" class="flight" aria-label="Coffee delivery flight" tabindex="-1">
+      <div class="scene-topline">
+        <div class="mission"><span class="mission-dot"></span><span id="mission-title">One coffee. One soft landing.</span></div>
+        <span class="assist-label" id="assistance-label">Manual targets</span>
+      </div>
+      <div class="scene-shell">
+        <svg id="scene" viewBox="0 0 1100 580" role="img" aria-labelledby="scene-title scene-description">
+          <title id="scene-title">Coffee delivery flight scene</title>
+          <desc id="scene-description">Connect hardware to display the authoritative simulated drone pose. The landing pad is the marked target.</desc>
+          <defs>
+            <pattern id="ground-grid" width="120" height="70" patternUnits="userSpaceOnUse" patternTransform="matrix(1 0 -.65 .48 0 270)"><path d="M120 0H0V70" fill="none" stroke="#d2c6b2" stroke-width="1.1"/></pattern>
+            <clipPath id="ground-clip"><path d="M0 310 1100 278V580H0Z"/></clipPath>
+          </defs>
+          <path fill="#e8e8da" d="M0 0h1100v580H0Z"/>
+          <circle cx="873" cy="96" r="44" fill="#e4bb75"/>
+          <path fill="#ced7c6" d="M0 227 85 181 157 216 271 155 387 240 509 195 622 229 769 162 893 229 1017 190 1100 225V580H0Z"/>
+          <path fill="#bac9b8" d="m0 273 168-70 139 70 183-45 168 38 100-46 164 59 178-45v346H0Z"/>
+          <path fill="#e1d7c5" d="M0 310 1100 278V580H0Z"/>
+          <path fill="url(#ground-grid)" clip-path="url(#ground-clip)" d="M0 0h1100v580H0Z"/>
+          <path d="m-80 510 1250-49" stroke="#d0c3af" stroke-width="44"/>
+          <path d="m-80 510 1250-49" stroke="#eee5d5" stroke-width="2" stroke-dasharray="18 20"/>
+          <g class="coffee-shop" aria-hidden="true" transform="translate(857 253)">
+            <path d="m0 30 99-23 62 34-99 24Z" fill="#b39e86"/>
+            <path d="M0-55 99-78V7L0 30Z" fill="#f5e5c4"/><path d="m99-78 62 34v85L99 7Z" fill="#e1c58e"/>
+            <path d="m-9-59 110-26 67 36-111 27Z" fill="#ac533c"/>
+            <path d="m14-36 71-17v27L14-9Z" fill="#53685f"/><path d="m36-41 0 27M61-47v28" stroke="#e8d2a7" stroke-width="4"/>
+            <path d="m14-9 71-17 4 11-73 17Z" fill="#ac533c"/>
+            <path d="m116-52 25 14v50l-25-14Z" fill="#79674e"/>
+            <path d="m7-66 74-17" stroke="#f5e5c4" stroke-width="11"/><text transform="matrix(1 -.23 0 1 17 -64)" font-size="9" letter-spacing="2" fill="#683d2d" font-weight="700">COFFEE</text>
+          </g>
+          <g id="landing-pad" transform="translate(578 376)">
+            <ellipse rx="97" ry="40" fill="#c7b99f"/>
+            <ellipse cy="-7" rx="97" ry="40" fill="#f0e5cc" stroke="#c6b597" stroke-width="2"/>
+            <path id="pad-tolerance" d="M61-7a61 20 0 1 0-122 0a61 20 0 1 0 122 0" fill="none" stroke="#c35635" stroke-width="2.5" stroke-dasharray="7 5"/>
+            <path d="M-18-21v28m36-28v28m-36-14h36" fill="none" stroke="#c35635" stroke-width="7"/>
+            <path d="m102 3 21 11h59" stroke="#84684a" stroke-width="1" fill="none"/>
+            <text x="128" y="8" class="scene-label">THE DROP-OFF</text><text id="pad-radius" x="128" y="19" class="scene-label"></text>
+          </g>
+          <g id="reference-marker" hidden aria-label="Current bounded flight target"><ellipse rx="19" ry="10" fill="#fcf8ef" fill-opacity=".8" stroke="#fcf8ef" stroke-width="7"/><ellipse rx="19" ry="10" fill="none" stroke="#386a50" stroke-width="2.5"/><path d="M-27 0H-10M10 0h17M0-17v10M0 7v10" stroke="#386a50" stroke-width="2.5"/><rect x="28" y="-20" width="57" height="19" rx="3" fill="#fcf8ef"/><text x="35" y="-7" class="target-label">TARGET</text></g>
+          <ellipse id="drone-shadow" cx="425" cy="397" rx="46" ry="14" fill="#796c56" opacity=".18" hidden/>
+          <path id="altitude-line" d="" fill="none" stroke="#877965" stroke-width="1" stroke-dasharray="3 6" hidden/>
+          <g id="drone" hidden>
+            <g id="drone-attitude">
+              <path d="M-24 15-30 41M24 15 30 41M-40 42h23M17 42h23" stroke="#3e4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <path d="M-15-8-68-21M15-8 68-21M-15 1-64 12M15 1 64 12" stroke="#3e4a42" stroke-width="8" stroke-linecap="round"/>
+              <g fill="#577261" stroke="#30473c" stroke-width="1.8"><ellipse cx="-69" cy="-25" rx="31" ry="8"/><ellipse cx="69" cy="-25" rx="31" ry="8"/><ellipse cx="-65" cy="9" rx="32" ry="9"/><ellipse cx="65" cy="9" rx="32" ry="9"/></g>
+              <g fill="#bcd0b4"><ellipse cx="-69" cy="-25" rx="23" ry="2"/><ellipse cx="69" cy="-25" rx="23" ry="2"/><ellipse cx="-65" cy="9" rx="24" ry="2"/><ellipse cx="65" cy="9" rx="24" ry="2"/></g>
+              <path d="m-29-14 28-8 31 8v23L0 19-29 9Z" fill="#eee6c8" stroke="#3e4a42" stroke-width="2"/>
+              <path d="m-29-14 29 10 30-10M0-4v23" stroke="#c3b797" fill="none" stroke-width="2"/>
+              <circle cx="14" cy="4" r="3" fill="#bb573b"/>
+              <g transform="translate(0 22)"><path d="M-10-4h20L7 19H-7Z" fill="#c35635" stroke="#783b29" stroke-width="1.3"/><path d="M-12-5h24v4h-24Z" fill="#f5e5c4"/><path d="M-8-8H8v3H-8Z" fill="#f5e5c4"/><path d="M-8 5H8v8H-8Z" fill="#eedcbb"/><path d="M-2 7h4v4h-4Z" fill="#c35635"/></g>
+            </g>
+          </g>
+          <g aria-hidden="true" transform="translate(62 479)"><path d="M0 0v-42M0 0l42 8.4M0 0l-22 13.2" stroke="#8d816b" stroke-width="1.2" fill="none"/><text x="-3" y="-51" class="axis-label">Z</text><text x="48" y="12" class="axis-label">X</text><text x="-37" y="28" class="axis-label">Y</text></g>
+          <g id="gust-visual" hidden transform="translate(75 224)" fill="none" stroke="#7d8c76" stroke-width="3" stroke-linecap="round"><path d="M0 0h92q29 0 29-16t-21-14M-20 15h158q25 0 25 15t-18 15M22 30h74"/></g>
+        </svg>
+        <div class="scene-message" id="scene-message"><span class="message-kicker">Ready when you are</span><strong>The coffee can wait.<br>Connect your coprocessor.</strong><span>Real Arty controls. A simulated little world.</span></div>
+        <div class="flight-readouts" aria-label="Flight telemetry"><span>Altitude <strong id="altitude">—</strong></span><span>Speed <strong id="speed">—</strong></span><span>To pad <strong id="distance">—</strong></span></div>
+        <div class="event-toast" id="event-toast" role="status" hidden></div>
+      </div>
+      <div class="flight-toolbar">
+        <div class="flight-actions"><button id="connect-button" class="button button-secondary">Connect Arty <span aria-hidden="true">↗</span></button><button id="start-button" class="button button-primary" disabled>Start delivery <span aria-hidden="true">→</span></button></div>
+        <div class="control-guides"><div class="keyboard-guide"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> steer</span><span><kbd>Q</kbd> down <kbd>E</kbd> up</span><span><kbd>Esc</kbd> take over</span></div><div class="board-guide" aria-label="Physical Arty gust buttons: BTN0 minus X, BTN1 plus X, BTN2 minus Y, BTN3 plus Y. SW0 ON resets the board; return SW0 OFF before play.">Arty gusts: <strong>BTN0 −X · BTN1 +X · BTN2 −Y · BTN3 +Y</strong><br>Reset: <strong>SW0 ON</strong>, then <strong>OFF before play</strong></div></div>
+      </div>
+      <div class="touch-controls" aria-label="Touch flight controls"><button data-axis="y" data-value="1" aria-label="Move forward">↑</button><button data-axis="x" data-value="-1" aria-label="Move left">←</button><button data-axis="y" data-value="-1" aria-label="Move backward">↓</button><button data-axis="x" data-value="1" aria-label="Move right">→</button><button data-axis="z" data-value="-1" aria-label="Lower altitude">− altitude</button><button data-axis="z" data-value="1" aria-label="Raise altitude">+ altitude</button></div>
+      <div class="motor-strip" aria-label="Actual FPGA motor commands"><span class="motor-heading">FPGA motor outputs <small>Normalized commands · 0–1</small></span><div class="motor-meters">
+        <div class="motor"><label for="motor-1">M1 <span id="motor-value-1">—</span></label><meter id="motor-1" hidden min="0" max="1" value="0" aria-label="Motor 1 actual command" aria-valuetext="No hardware sample"></meter></div>
+        <div class="motor"><label for="motor-2">M2 <span id="motor-value-2">—</span></label><meter id="motor-2" hidden min="0" max="1" value="0" aria-label="Motor 2 actual command" aria-valuetext="No hardware sample"></meter></div>
+        <div class="motor"><label for="motor-3">M3 <span id="motor-value-3">—</span></label><meter id="motor-3" hidden min="0" max="1" value="0" aria-label="Motor 3 actual command" aria-valuetext="No hardware sample"></meter></div>
+        <div class="motor"><label for="motor-4">M4 <span id="motor-value-4">—</span></label><meter id="motor-4" hidden min="0" max="1" value="0" aria-label="Motor 4 actual command" aria-valuetext="No hardware sample"></meter></div>
+      </div><span id="motor-sample-status" class="motor-sample-status">No hardware sample</span></div>
+    </section>
+
+    <section class="round-results" id="round-results" aria-labelledby="round-results-title" hidden><div class="round-results-heading"><h2 id="round-results-title">The delivery record</h2><span>Observed rounds · no automatic score</span></div><table><thead><tr><th scope="col">Recorded measure</th><th scope="col">Human target steering</th><th scope="col">Copilot landing policy</th></tr></thead><tbody>
+      <tr><th scope="row">Outcome</th><td id="human-result-status">Not run yet</td><td id="copilot-result-status">Not run yet</td></tr>
+      <tr><th scope="row">Elapsed wall time</th><td id="human-result-elapsed">—</td><td id="copilot-result-elapsed">—</td></tr>
+      <tr><th scope="row">Simulation time</th><td id="human-result-simulation">—</td><td id="copilot-result-simulation">—</td></tr>
+      <tr><th scope="row">Physical gusts applied</th><td id="human-result-gusts">—</td><td id="copilot-result-gusts">—</td></tr>
+      <tr><th scope="row">Gusts by direction</th><td class="direction-counts" id="human-result-gust-directions">—</td><td class="direction-counts" id="copilot-result-gust-directions">—</td></tr>
+      <tr><th scope="row">Touchdown speed</th><td id="human-result-touchdown">—</td><td id="copilot-result-touchdown">—</td></tr>
+      <tr><th scope="row">Control policy</th><td id="human-result-policy">—</td><td id="copilot-result-policy">—</td></tr>
+    </tbody></table><p>Both use the same FPGA-assisted control loop. Live gust timing may differ.</p></section>
+
+    <section class="copilot" aria-labelledby="copilot-title">
+      <div class="copilot-badge" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="M9 18 17 8h22l8 10v24H9Z"/><path d="M18 24v8m20-8v8M22 39h12M28 3v5"/><circle cx="28" cy="3" r="2"/></svg></div>
+      <div class="copilot-content">
+        <div class="copilot-heading"><h2 id="copilot-title">Your copilot</h2><span id="copilot-status">Checking availability</span></div>
+        <p id="copilot-text" aria-live="polite">I bring the moral support. The FPGA brings the reflexes.</p>
+        <form id="chat-form"><label for="chat-input" class="visually-hidden">Message your copilot</label><input id="chat-input" name="message" maxlength="600" placeholder="Try “Help me land gently”" autocomplete="off" disabled><button class="send-button" id="send-button" type="submit" aria-label="Send message to copilot" disabled>↗</button></form>
+        <div class="copilot-quick-actions"><button data-message="Help me land gently." disabled>Help me land gently</button><button data-message="Your turn. Please land on the coffee pad." disabled>Your turn</button><button id="cancel-button" disabled>I'll take it from here <span aria-hidden="true">↩</span></button></div>
+      </div>
+    </section>
+    <p class="request-error" id="request-error" role="alert" hidden></p>
+    <footer class="status-strip" aria-label="Connection status"><span class="source-label" id="source-label">No hardware data</span><span class="qualification" id="qualification">Private bridge required</span></footer>
+    <details class="diagnostics" id="diagnostics"><summary>Control notes</summary><div class="diagnostic-layout"><div><h3>Player controls</h3><p>A / D or ← / →: −X / +X. W / S or ↑ / ↓: +Y / −Y. Q / E lowers or raises the target. Escape takes over from the copilot.</p><p>Physical gusts: BTN0 −X, BTN1 +X, BTN2 −Y, BTN3 +Y. SW0 ON resets the board; return SW0 OFF before play.</p></div><div><h3>Public frontend</h3><p>Live board and AI interaction requires the private local backend. A static fixture is an illustrative preview with flight and model commands disabled.</p><p>Flight is simulated. The live demo uses real Arty hardware and Amazon Bedrock.</p></div></div></details>
+    <div class="colophon"><span>Handle with care. Caffeinate with courage.</span><span>Simulated flight · Hardware computation</span></div>
+  </main>
+</body>
+</html>
