@@ -1,8 +1,28 @@
 # You Fly. I Panic.
 
-A coffee-delivery game with a human pilot, an AI copilot, and a real Arty FPGA board. Steer a simulated drone toward its landing pad while a spectator uses physical buttons to send directional gusts.
+**An AI agent shares control with a human in a hardware-backed coffee-delivery game.** Ask the copilot to help land a simulated drone while a spectator uses physical Arty FPGA buttons to send directional gusts.
 
 **This repository contains the public frontend only.** Live hardware and AI interaction require a private local backend, a programmed Arty board, and an authorized Amazon Bedrock service. Those components are not included here.
+
+## Where the agent is
+
+The agent runs in the private backend through Amazon Bedrock. The browser is its interface. Its implemented loop is:
+
+1. **Observe:** receive the player's request and a bounded snapshot of flight telemetry, disturbances, and hardware status.
+2. **Request an action:** the model can call one of four constrained tools shown below.
+3. **Check authority:** the local bridge validates the arguments, session, observation age, and whether the human has taken over. It applies or rejects the request.
+4. **Receive feedback:** the actual tool result and fresh telemetry go back to the model for a text-only acknowledgment. A requested landing is not a confirmed landing; the simulation determines the outcome.
+
+| Agent tool | Allowed effect |
+|---|---|
+| `request_landing(pad_id="coffee-pad")` | Start the existing bounded landing policy for the known pad |
+| `hold_position()` | Hold the current bounded position with assistance |
+| `set_assistance(enabled)` | Enable or disable target assistance |
+| `cancel_copilot_action()` | Cancel the landing action and yield to the player |
+
+Model inference runs separately from the physics loop. Human steering invalidates pending model actions so a late response cannot take control back. The human round allows coaching but rejects agent control actions.
+
+**The language model chooses a supported policy; the FPGA computes the low-level control commands.** This is one language-model agent working with a deterministic controller. It does not generate motor commands, train online, or discover a new landing controller. The public files document this integration but do not contain or independently reproduce the runtime agent.
 
 ## Preview the interface
 
@@ -29,7 +49,7 @@ A person steers the flight target in the human round. In the copilot round, a re
 
 ## What was built for the hackathon
 
-The project reuses a pre-existing board controller. The new hackathon work is the coffee-delivery game, browser interface, human/copilot round flow, physical directional-gust interaction, and integration of bounded AI assistance with the local application.
+The project reuses a pre-existing board controller. The new hackathon work is the agent's telemetry and tool interface, application/rejection feedback, human takeover handling, and their integration into the coffee-delivery game with physical directional gusts and human/copilot rounds.
 
 The controller implementation, numerical model, hardware build artifacts, backend configuration, and detailed runtime evidence remain private. This repository does not reproduce those components or make a standalone hardware-performance claim.
 

@@ -18,7 +18,7 @@ Screen axes: +X points right and down; +Y points left and down.
 
 ## 0:00–0:20 — Explain the coffee
 
-“Get the coffee to the pad. The world is simulated, but the board and AI connection are real. We reuse an existing board controller; the game and human/copilot interaction are our hackathon work.”
+“Can an AI agent share control with a human? Deliver this coffee while I control the wind. The drone is simulated; the FPGA and model calls are real. Our agent observes telemetry, requests bounded actions, receives actual results, and yields when you take over.”
 
 ## 0:20–0:55 — Human round
 
@@ -30,7 +30,7 @@ The host makes **two spaced physical presses**, releasing each button fully: BTN
 
 Choose **2. Copilot round**. Wait until the interface reports that a model landing action has been applied. The host then makes **two spaced physical presses**, releasing each button fully: BTN0, then BTN1. Leave at least three seconds between presses, and skip the second if the flight has already ended.
 
-Point out the actual drone movement, target, and recorded gust count. Keyboard steering or Escape lets the person take over; any takeover should be described as mixed control.
+Point out the applied model landing request and the actual drone movement, target, and recorded gust count. Say: “The model requested a supported landing policy. The FPGA computes the controls; the model gets the action result and telemetry back.” Read any coaching as an observation tied to its displayed snapshot, not a guarantee of recovery. Keyboard steering or Escape lets the person take over; any takeover should be described as mixed control.
 
 ## 1:35–2:00 — Show what happened
 
